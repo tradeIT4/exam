@@ -17,8 +17,8 @@ api.interceptors.response.use(
       const isSessionInvalidated = error.response.data?.message?.includes("Session invalidated") || false;
       localStorage.removeItem("exam_token");
       localStorage.removeItem("exam_user");
-      if (!window.location.pathname.startsWith("/login")) {
-        window.location.href = isSessionInvalidated ? "/login?expired=true" : "/login";
+      if (!window.location.hash.startsWith("#/login")) {
+        window.location.href = isSessionInvalidated ? "/#/login?expired=true" : "/#/login";
       }
     }
     return Promise.reject(error);
@@ -35,4 +35,6 @@ export function downloadFile(path, filename) {
     URL.revokeObjectURL(url);
   });
 }
+
+
 

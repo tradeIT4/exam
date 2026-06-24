@@ -10,7 +10,7 @@ export default function Home() {
 
   function handleStartExam() {
     setShowStartNotice(true);
-    window.open("/login", "_blank", "noopener,noreferrer");
+    window.open("/#/login", "_blank", "noopener,noreferrer");
     window.setTimeout(() => setShowStartNotice(false), 3500);
   }
 
@@ -72,6 +72,7 @@ export default function Home() {
     </main>
   );
 }
+
 
 
 
