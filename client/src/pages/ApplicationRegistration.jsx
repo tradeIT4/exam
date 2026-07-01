@@ -22,7 +22,7 @@ const fieldGroups = [
   ],
   ["employmentStatus", "companyCategory", "registerFor", "assessmentType"],
   ["paymentBank", "paymentScreenshot"],
-  ["agreementAccepted", "digitalSignature"]
+  ["agreementAccepted"]
 ];
 
 const defaultValues = {
@@ -216,10 +216,10 @@ function SignaturePad({ onChange }) {
     const context = canvas.getContext("2d");
     const point = pointFromEvent(event);
     drawingRef.current = true;
-    context.lineWidth = 3;
+    context.lineWidth = 2.4;
     context.lineCap = "round";
     context.lineJoin = "round";
-    context.strokeStyle = "#172b4d";
+    context.strokeStyle = "#111827";
     context.beginPath();
     context.moveTo(point.x, point.y);
   }
@@ -333,6 +333,10 @@ export default function ApplicationRegistration() {
 
   async function onSubmit(data) {
     setServerError("");
+    if (window.innerWidth <= 767 && !data.digitalSignature?.trim()) {
+      setServerError("Draw your digital signature before submitting.");
+      return;
+    }
     const formData = new FormData();
     Object.entries(data).forEach(([key, value]) => {
       if (key === "passportPhoto" || key === "fayadaDigitalId" || key === "paymentScreenshot") return;
@@ -471,6 +475,7 @@ export default function ApplicationRegistration() {
                   <section className="mobile-digital-registration" aria-label="Digital registration signature">
                     <div className="digital-signature-field">
                       <span>Digital Signature</span>
+                      <p>Sign inside the box below.</p>
                       <input
                         type="hidden"
                         {...register("digitalSignature", {
