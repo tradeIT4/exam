@@ -175,13 +175,49 @@ function DetailSection({ title, icon: Icon, items }) {
 }
 
 
-function OfficialPhotoPlacementPreview() {
+
+function PersonalInformationSection({ application }) {
+  const photoUrl = assetUrl(application.passportPhoto?.path);
+  const items = [
+    ["Full Name", fullName(application.personalInformation)],
+    ["Gender", application.personalInformation?.gender],
+    ["Age", application.personalInformation?.age],
+    ["Nationality", application.personalInformation?.nationality],
+    ["Phone", application.personalInformation?.phoneNumber],
+    ["Email", application.personalInformation?.email],
+    ["Sub City", application.personalInformation?.subCity],
+    ["Woreda", application.personalInformation?.woreda],
+    ["Address", application.personalInformation?.address],
+    ["Marital Status", application.personalInformation?.maritalStatus],
+    ["Physical Disability", application.personalInformation?.physicalDisability],
+    ["Disability Description", application.personalInformation?.disabilityDescription]
+  ];
+
   return (
-    <section className="rounded-xl border border-slate-200 bg-slate-100 p-3 dark:border-slate-800 dark:bg-[#0f172a]">
-      <div className="mx-auto aspect-[210/297] w-full max-w-[760px] border border-slate-900 bg-white p-8 text-slate-950 shadow-sm dark:border-slate-600 dark:bg-white dark:text-slate-950 sm:p-10">
-        <div className="flex justify-end">
-          <div className="flex h-40 w-36 items-center justify-center border-2 border-slate-950 bg-white p-3 text-center text-[11px] font-bold uppercase leading-5 tracking-wide text-slate-700 sm:h-48 sm:w-40">
-            Affix Passport Size Photo Here
+    <section className="rounded-xl border border-blue-100 bg-white p-4 dark:border-slate-800 dark:bg-[#111a2b]">
+      <div className="mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-100">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-[#0f88d2] dark:bg-[#17324d] dark:text-sky-300">
+          <UserRound size={18} />
+        </span>
+        <h3 className="font-bold">Personal Information</h3>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-[1fr_180px] lg:items-start">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {items.map(([label, value]) => (
+            <div key={label} className="min-w-0 rounded-lg bg-slate-50 p-3 dark:bg-[#0f172a]">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</p>
+              <p className="mt-1 break-words text-sm font-semibold text-slate-800 dark:text-slate-100">{value || "Not provided"}</p>
+            </div>
+          ))}
+        </div>
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-[#0f172a]">
+          <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Personal Photo</p>
+          <div className="mx-auto flex h-52 w-40 items-center justify-center overflow-hidden rounded-md border border-slate-300 bg-white dark:border-slate-600 dark:bg-[#111a2b]">
+            {photoUrl ? (
+              <img className="h-full w-full object-cover" src={photoUrl} alt="Personal" />
+            ) : (
+              <span className="px-3 text-center text-xs font-semibold text-slate-400">No personal photo</span>
+            )}
           </div>
         </div>
       </div>
@@ -351,21 +387,7 @@ export default function Applications() {
               </div>
             </div>
 
-            <OfficialPhotoPlacementPreview />
-            <DetailSection title="Personal Information" icon={UserRound} items={[
-              ["Full Name", fullName(selected.personalInformation)],
-              ["Gender", selected.personalInformation?.gender],
-              ["Age", selected.personalInformation?.age],
-              ["Nationality", selected.personalInformation?.nationality],
-              ["Phone", selected.personalInformation?.phoneNumber],
-              ["Email", selected.personalInformation?.email],
-              ["Sub City", selected.personalInformation?.subCity],
-              ["Woreda", selected.personalInformation?.woreda],
-              ["Address", selected.personalInformation?.address],
-              ["Marital Status", selected.personalInformation?.maritalStatus],
-              ["Physical Disability", selected.personalInformation?.physicalDisability],
-              ["Disability Description", selected.personalInformation?.disabilityDescription]
-            ]} />
+            <PersonalInformationSection application={selected} />
 
             <DetailSection title="Training Information" icon={GraduationCap} items={[
               ["Occupation", selected.trainingInformation?.occupation],
