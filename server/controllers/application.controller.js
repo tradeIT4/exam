@@ -63,6 +63,10 @@ function assertCompressedUpload(file) {
   throw error;
 }
 
+function uploadPath(filename) {
+  return `/api/applications/uploads/${encodeURIComponent(filename)}`;
+}
+
 function buildUploadDocument(file) {
   const extension = extname(file.originalname).toLowerCase() || ".jpg";
   const filename = `${Date.now()}-${randomUUID()}${extension}`;
@@ -70,12 +74,37 @@ function buildUploadDocument(file) {
   return {
     filename,
     originalName: file.originalname,
-    path: `/uploads/applications/${filename}`,
+    path: uploadPath(filename),
     storage: "mongodb",
     mimetype: file.mimetype,
     size: file.size,
     data: file.buffer
   };
+}
+
+function uploadForResponse(upload) {
+  if (!upload) return upload;
+  return {
+    ...upload,
+    path: upload.filename ? uploadPath(upload.filename) : upload.path
+  };
+}
+
+function applicationForResponse(application) {
+  if (!application) return application;
+  return {
+    ...application,
+    passportPhoto: uploadForResponse(application.passportPhoto),
+    fayadaDigitalId: uploadForResponse(application.fayadaDigitalId)
+  };
+}
+
+function storedBuffer(data) {
+  if (!data) return null;
+  if (Buffer.isBuffer(data)) return data;
+  if (data.buffer) return Buffer.from(data.buffer);
+  if (data.data) return Buffer.from(data.data);
+  return Buffer.from(data);
 }
 
 function findStoredFile(application, filename) {
@@ -154,8 +183,8 @@ export async function createApplication(req, res, next) {
       applicationNumber: application.applicationNumber,
       submittedAt: application.submittedAt,
       uploads: {
-        passportPhoto: application.passportPhoto.path,
-        fayadaDigitalId: application.fayadaDigitalId.path,
+        passportPhoto: uploadPath(application.passportPhoto.filename),
+        fayadaDigitalId: uploadPath(application.fayadaDigitalId.filename),
         storage: "mongodb"
       }
     });
@@ -188,7 +217,7 @@ export async function listApplications(req, res, next) {
     }
 
     const applications = await Application.find(query).select("-passportPhoto.data -fayadaDigitalId.data").sort({ submittedAt: -1, createdAt: -1 }).lean();
-    res.json(applications);
+    res.json(applications.map(applicationForResponse));
   } catch (error) {
     next(error);
   }
@@ -201,7 +230,7 @@ export async function getApplicationByNumber(req, res, next) {
       error.statusCode = 404;
       throw error;
     }
-    res.json({ application });
+    res.json({ application: applicationForResponse(application) });
   } catch (error) {
     next(error);
   }
@@ -214,15 +243,16 @@ export async function serveApplicationUpload(req, res, next) {
         { "passportPhoto.filename": filename },
         { "fayadaDigitalId.filename": filename }
       ]
-    }).select("+passportPhoto.data +fayadaDigitalId.data passportPhoto fayadaDigitalId");
+    }).select("+passportPhoto.data +fayadaDigitalId.data");
 
     const file = findStoredFile(application, filename);
-    if (!file?.data) return next();
+    const buffer = storedBuffer(file?.data);
+    if (!buffer) return next();
 
-    res.setHeader("Content-Type", file.mimetype);
-    res.setHeader("Content-Length", file.size);
+    res.setHeader("Content-Type", file.mimetype || "application/octet-stream");
+    res.setHeader("Content-Length", buffer.length);
     res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-    return res.send(Buffer.from(file.data));
+    return res.send(buffer);
   } catch (error) {
     return next(error);
   }
