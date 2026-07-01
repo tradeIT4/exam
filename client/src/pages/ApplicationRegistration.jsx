@@ -389,6 +389,13 @@ export default function ApplicationRegistration() {
                     <span>I confirm that the information provided is correct.</span>
                   </label>
                   <FieldError error={errors.agreementAccepted} />
+                  <section className="mobile-digital-registration" aria-label="Digital registration">
+                    <div>
+                      <span>Digital Registration</span>
+                      <strong>Mobile Application</strong>
+                    </div>
+                    <div className="digital-registration-stamp">Ready</div>
+                  </section>
                 </div>
               )}
 
