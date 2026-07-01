@@ -229,9 +229,10 @@ export async function createApplication(req, res, next) {
     });
   } catch (error) {
     if (error.name === "ZodError") {
-      error.statusCode = 400;
-      error.message = "Application validation failed";
-      error.details = error.errors;
+      const validationError = new Error("Application validation failed");
+      validationError.statusCode = 400;
+      validationError.details = error.errors;
+      return next(validationError);
     }
     next(error);
   }
