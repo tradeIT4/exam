@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { authorize, protect } from "../middlewares/auth.js";
-import { createApplication, getApplicationByNumber, listApplications, serveApplicationUpload } from "../controllers/application.controller.js";
+import { createApplication, deleteApplication, getApplicationByNumber, listApplications, serveApplicationUpload } from "../controllers/application.controller.js";
 
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 const maxRawImageSize = 20 * 1024 * 1024;
@@ -34,6 +34,7 @@ const router = Router();
 router.get("/", protect, authorize("ADMIN"), listApplications);
 router.post("/", handleApplicationUpload, createApplication);
 router.get("/uploads/:filename", serveApplicationUpload);
+router.delete("/:id", protect, authorize("ADMIN"), deleteApplication);
 router.get("/:applicationNumber", getApplicationByNumber);
 
 export default router;

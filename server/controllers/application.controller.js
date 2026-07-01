@@ -222,6 +222,21 @@ export async function listApplications(req, res, next) {
     next(error);
   }
 }
+
+export async function deleteApplication(req, res, next) {
+  try {
+    const application = await Application.findByIdAndDelete(req.params.id);
+    if (!application) {
+      const error = new Error("Application not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    res.json({ message: "Application deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
 export async function getApplicationByNumber(req, res, next) {
   try {
     const application = await Application.findOne({ applicationNumber: req.params.applicationNumber }).select("-passportPhoto.data -fayadaDigitalId.data").lean();

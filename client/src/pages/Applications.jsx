@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BriefcaseBusiness, Eye, FileCheck2, GraduationCap, Printer, Search, UserRound } from "lucide-react";
+import { BriefcaseBusiness, Eye, FileCheck2, GraduationCap, Printer, Search, Trash2, UserRound } from "lucide-react";
 import DataTable from "../components/DataTable.jsx";
 import Modal from "../components/Modal.jsx";
 import { api, assetUrl } from "../services/api.js";
@@ -174,6 +174,8 @@ export default function Applications() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -194,6 +196,21 @@ export default function Applications() {
       cancelled = true;
     };
   }, [search]);
+  async function confirmDelete() {
+    if (!deleteTarget?._id) return;
+    setDeleting(true);
+    setError("");
+    try {
+      await api.delete(`/applications/${deleteTarget._id}`);
+      setRows((current) => current.filter((row) => row._id !== deleteTarget._id));
+      if (selected?._id === deleteTarget._id) setSelected(null);
+      setDeleteTarget(null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete application");
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   const stats = useMemo(() => {
     const theory = rows.filter((row) => row.assessmentInformation?.registerFor === "Theory").length;
@@ -247,6 +264,9 @@ export default function Applications() {
           <button className="btn-secondary" type="button" onClick={() => printApplication(row)}>
             <Printer size={14} /> Print
           </button>
+          <button className="btn-secondary border-red-200 text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30" type="button" onClick={() => setDeleteTarget(row)}>
+            <Trash2 size={14} /> Delete
+          </button>
         </div>
       )
     }
@@ -280,6 +300,21 @@ export default function Applications() {
 
       <DataTable columns={columns} rows={rows} empty="No assessment applications found" />
 
+      {deleteTarget && (
+        <Modal title="Delete Application" onClose={() => !deleting && setDeleteTarget(null)}>
+          <div className="space-y-4">
+            <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+              Delete application <strong className="text-slate-950 dark:text-slate-100">{deleteTarget.applicationNumber}</strong> for <strong className="text-slate-950 dark:text-slate-100">{fullName(deleteTarget.personalInformation)}</strong>? This removes the application and uploaded images from MongoDB.
+            </p>
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button className="btn-secondary" type="button" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</button>
+              <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={confirmDelete} disabled={deleting}>
+                <Trash2 size={16} /> {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
       {selected && (
         <Modal title={`Application ${selected.applicationNumber}`} onClose={() => setSelected(null)}>
           <div className="space-y-4">
