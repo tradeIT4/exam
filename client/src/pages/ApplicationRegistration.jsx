@@ -188,9 +188,9 @@ function RadioGroup({ label, error, options, registerProps, span = "half" }) {
   );
 }
 
-function ReviewItem({ label, value }) {
+function ReviewItem({ label, value, mobileHidden = false }) {
   return (
-    <div className="review-item">
+    <div className={`review-item ${mobileHidden ? "review-item-mobile-hidden" : ""}`}>
       <span>{label}</span>
       <strong>{value || "Not provided"}</strong>
     </div>
@@ -299,9 +299,9 @@ export default function ApplicationRegistration() {
     ["Email", values.email],
     ["Marital Status", values.maritalStatus],
     ["Physical Disability", values.physicalDisability],
-    ["Disability Description", values.disabilityDescription],
-    ["Passport Photo", photoStatus],
-    ["FAYADA DIGITAL ID", fayadaStatus],
+    ...(values.disabilityDescription ? [["Disability Description", values.disabilityDescription]] : []),
+    ["Passport Photo", photoStatus, { mobileHidden: true }],
+    ["FAYADA DIGITAL ID", fayadaStatus, { mobileHidden: true }],
     ["Occupation", values.occupation],
     ["College/Institute Name", values.collegeInstituteName],
     ["Institution Type", values.institutionType],
@@ -317,7 +317,7 @@ export default function ApplicationRegistration() {
     ["Register For", values.registerFor],
     ["Assessment Type", values.assessmentType],
     ["Payment Bank", values.paymentBank],
-    ["Payment Screenshot", paymentScreenshotStatus]
+    ["Payment Screenshot", paymentScreenshotStatus, { mobileHidden: true }]
   ], [values, photoStatus, fayadaStatus, paymentScreenshotStatus]);
 
   async function goNext() {
@@ -466,7 +466,7 @@ export default function ApplicationRegistration() {
 
               {step === 4 && (
                 <div>
-                  <div className="review-grid">{reviewItems.map(([label, value]) => <ReviewItem key={label} label={label} value={value} />)}</div>
+                  <div className="review-grid">{reviewItems.map(([label, value, options]) => <ReviewItem key={label} label={label} value={value} mobileHidden={options?.mobileHidden} />)}</div>
                   <label className="agreement-check">
                     <input type="checkbox" {...register("agreementAccepted", { required: "Confirmation is required" })} />
                     <span>I confirm that the information provided is correct.</span>

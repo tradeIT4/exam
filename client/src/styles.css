@@ -572,6 +572,11 @@ body {
 }
 
 @media (max-width: 767px) {
+
+  .review-item-mobile-hidden {
+    display: none;
+  }
+
   .mobile-digital-registration {
     display: block;
     margin-top: 16px;
