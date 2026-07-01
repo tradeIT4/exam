@@ -61,6 +61,7 @@ function buildUploadDocument(file) {
     filename,
     originalName: file.originalname,
     path: `/uploads/applications/${filename}`,
+    storage: "mongodb",
     mimetype: file.mimetype,
     size: file.size,
     data: file.buffer
@@ -141,7 +142,8 @@ export async function createApplication(req, res, next) {
       submittedAt: application.submittedAt,
       uploads: {
         passportPhoto: application.passportPhoto.path,
-        fayadaDigitalId: application.fayadaDigitalId.path
+        fayadaDigitalId: application.fayadaDigitalId.path,
+        storage: "mongodb"
       }
     });
   } catch (error) {

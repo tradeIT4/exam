@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { api, apiBaseURL } from "../services/api.js";
+import { api, apiBaseURL, assetUrl } from "../services/api.js";
 import tessbinLogo from "../logo/download.png";
 
 const steps = [
@@ -178,12 +178,31 @@ export default function ApplicationRegistration() {
   }
 
   if (success) {
+    const passportPhotoUrl = assetUrl(success.uploads?.passportPhoto);
+    const fayadaDigitalIdUrl = assetUrl(success.uploads?.fayadaDigitalId);
+
     return (
       <main className="application-page">
         <div className="application-container application-container-narrow">
           <section className="success-panel text-center mx-auto">
             <CheckCircle2 size={58} className="success-check" />
             <h1>Application Submitted Successfully</h1>
+            {success.applicationNumber && <div className="application-number">{success.applicationNumber}</div>}
+            <p className="success-note">Your images were saved in MongoDB and loaded below from the application record.</p>
+            <div className="submitted-image-grid">
+              {passportPhotoUrl && (
+                <a href={passportPhotoUrl} target="_blank" rel="noreferrer" className="submitted-image-card">
+                  <span>Passport Photo</span>
+                  <img src={passportPhotoUrl} alt="Submitted passport" />
+                </a>
+              )}
+              {fayadaDigitalIdUrl && (
+                <a href={fayadaDigitalIdUrl} target="_blank" rel="noreferrer" className="submitted-image-card">
+                  <span>FAYADA / National ID</span>
+                  <img src={fayadaDigitalIdUrl} alt="Submitted FAYADA National ID" />
+                </a>
+              )}
+            </div>
           </section>
         </div>
       </main>

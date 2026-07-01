@@ -43,6 +43,7 @@ const applicationSchema = new mongoose.Schema(
       filename: { type: String, required: true },
       originalName: { type: String, required: true },
       path: { type: String, required: true },
+      storage: { type: String, default: "mongodb" },
       mimetype: { type: String, required: true },
       size: { type: Number, required: true },
       data: { type: Buffer, select: false }
@@ -51,6 +52,7 @@ const applicationSchema = new mongoose.Schema(
       filename: { type: String, required: true },
       originalName: { type: String, required: true },
       path: { type: String, required: true },
+      storage: { type: String, default: "mongodb" },
       mimetype: { type: String, required: true },
       size: { type: Number, required: true },
       data: { type: Buffer, select: false }
