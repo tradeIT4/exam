@@ -596,21 +596,35 @@ body {
     text-transform: uppercase;
   }
 
-  .digital-signature-field input {
-    width: 100%;
-    min-height: 48px;
-    padding: 10px 12px;
+  .digital-signature-pad {
+    display: grid;
+    gap: 10px;
+  }
+
+  .signature-canvas-frame {
+    overflow: hidden;
     border: 1px solid #0b5cab;
     border-radius: 8px;
     background: #ffffff;
-    color: #172b4d;
-    font-size: 1rem;
-    font-weight: 700;
   }
 
-  .digital-signature-field input::placeholder {
-    color: #7a8ca3;
-    font-weight: 600;
+  .signature-canvas-frame canvas {
+    display: block;
+    width: 100%;
+    height: 132px;
+    touch-action: none;
+  }
+
+  .signature-clear-button {
+    justify-self: end;
+    min-height: 36px;
+    padding: 7px 12px;
+    border: 1px solid #cddcf0;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #24496f;
+    font-size: 0.78rem;
+    font-weight: 900;
   }
 
   .form-field-third,

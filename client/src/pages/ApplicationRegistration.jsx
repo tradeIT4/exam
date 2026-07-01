@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { api, apiBaseURL } from "../services/api.js";
@@ -197,6 +197,76 @@ function ReviewItem({ label, value }) {
   );
 }
 
+function SignaturePad({ onChange }) {
+  const canvasRef = useRef(null);
+  const drawingRef = useRef(false);
+
+  function pointFromEvent(event) {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * canvas.width,
+      y: ((event.clientY - rect.top) / rect.height) * canvas.height
+    };
+  }
+
+  function startDrawing(event) {
+    event.preventDefault();
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+    const point = pointFromEvent(event);
+    drawingRef.current = true;
+    context.lineWidth = 3;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.strokeStyle = "#172b4d";
+    context.beginPath();
+    context.moveTo(point.x, point.y);
+  }
+
+  function draw(event) {
+    if (!drawingRef.current) return;
+    event.preventDefault();
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+    const point = pointFromEvent(event);
+    context.lineTo(point.x, point.y);
+    context.stroke();
+  }
+
+  function stopDrawing() {
+    if (!drawingRef.current) return;
+    drawingRef.current = false;
+    onChange(canvasRef.current.toDataURL("image/png"));
+  }
+
+  function clearSignature() {
+    const canvas = canvasRef.current;
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    onChange("");
+  }
+
+  return (
+    <div className="digital-signature-pad">
+      <div className="signature-canvas-frame">
+        <canvas
+          ref={canvasRef}
+          width="640"
+          height="220"
+          aria-label="Draw digital signature"
+          onPointerDown={startDrawing}
+          onPointerMove={draw}
+          onPointerUp={stopDrawing}
+          onPointerCancel={stopDrawing}
+          onPointerLeave={stopDrawing}
+        />
+      </div>
+      <button className="signature-clear-button" type="button" onClick={clearSignature}>Clear Signature</button>
+    </div>
+  );
+}
+
+
 export default function ApplicationRegistration() {
   const [step, setStep] = useState(0);
   const [serverError, setServerError] = useState("");
@@ -206,6 +276,7 @@ export default function ApplicationRegistration() {
     handleSubmit,
     trigger,
     watch,
+    setValue,
     formState: { errors, isSubmitting }
   } = useForm({ defaultValues, mode: "onTouched" });
 
@@ -398,16 +469,16 @@ export default function ApplicationRegistration() {
                   </label>
                   <FieldError error={errors.agreementAccepted} />
                   <section className="mobile-digital-registration" aria-label="Digital registration signature">
-                    <label className="digital-signature-field">
+                    <div className="digital-signature-field">
                       <span>Digital Signature</span>
                       <input
-                        type="text"
-                        placeholder="Type your full name as signature"
+                        type="hidden"
                         {...register("digitalSignature", {
-                          validate: (value) => window.innerWidth > 767 || Boolean(value?.trim()) || "Digital signature is required on mobile"
+                          validate: (value) => window.innerWidth > 767 || Boolean(value?.trim()) || "Draw your digital signature"
                         })}
                       />
-                    </label>
+                      <SignaturePad onChange={(signature) => setValue("digitalSignature", signature, { shouldDirty: true, shouldValidate: true })} />
+                    </div>
                     <FieldError error={errors.digitalSignature} />
                   </section>
                 </div>
