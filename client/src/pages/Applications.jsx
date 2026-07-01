@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BriefcaseBusiness, Eye, FileCheck2, GraduationCap, Image, Printer, Search, UserRound } from "lucide-react";
+import { BriefcaseBusiness, Eye, FileCheck2, GraduationCap, Printer, Search, UserRound } from "lucide-react";
 import DataTable from "../components/DataTable.jsx";
 import Modal from "../components/Modal.jsx";
 import { api, assetUrl } from "../services/api.js";
@@ -293,16 +293,6 @@ export default function Applications() {
                 <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0f88d2] px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700" type="button" onClick={() => printApplication(selected)}>
                   <Printer size={16} /> Print Application
                 </button>
-                {selected.passportPhoto?.path && (
-                  <a className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-[#0f88d2] shadow-sm transition hover:bg-blue-50 dark:bg-[#111a2b] dark:text-sky-300 dark:hover:bg-slate-800" href={assetUrl(selected.passportPhoto.path)} target="_blank" rel="noreferrer">
-                    <Image size={16} /> View Photo
-                  </a>
-                )}
-                {selected.fayadaDigitalId?.path && (
-                  <a className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-[#0f88d2] shadow-sm transition hover:bg-blue-50 dark:bg-[#111a2b] dark:text-sky-300 dark:hover:bg-slate-800" href={assetUrl(selected.fayadaDigitalId.path)} target="_blank" rel="noreferrer">
-                    <Image size={16} /> View National ID
-                  </a>
-                )}
               </div>
             </div>
 
