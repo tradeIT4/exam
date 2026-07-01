@@ -18,7 +18,7 @@ const fieldGroups = [
     "woreda", "address", "phoneNumber", "maritalStatus", "physicalDisability", "passportPhoto", "fayadaDigitalId"
   ],
   [
-    "occupation", "collegeInstituteName", "institutionType", "trainingStartMonth", "trainingEndMonth", "trainingMode", "trainingType", "cooperativeTraining"
+    "occupation", "collegeInstituteName", "institutionType", "trainingStartMonth", "trainingEndMonth", "trainingMode", "trainingProgram", "trainingType", "cooperativeTraining"
   ],
   ["employmentStatus", "companyCategory", "registerFor", "assessmentType"],
   ["paymentBank", "paymentScreenshot"],
@@ -231,6 +231,7 @@ export default function ApplicationRegistration() {
     ["Training Start Month", values.trainingStartMonth],
     ["Training End Month", values.trainingEndMonth],
     ["Training Mode", values.trainingMode],
+    ["Training Program", values.trainingProgram],
     ["Training Type", values.trainingType],
     ["Cooperative Training", values.cooperativeTraining],
     ["Employment Status", values.employmentStatus],
@@ -356,6 +357,7 @@ export default function ApplicationRegistration() {
                   <TextField label="Training Start Month" type="month" error={errors.trainingStartMonth} registerProps={register("trainingStartMonth", { required: "Training start month is required" })} />
                   <TextField label="Training End Month" type="month" error={errors.trainingEndMonth} registerProps={register("trainingEndMonth", { required: "Training end month is required" })} />
                   <SelectField label="Training Mode" error={errors.trainingMode} registerProps={register("trainingMode", { required: "Training mode is required" })}><option value="">Select mode</option><option>Regular</option><option>Extension</option><option>Distance</option><option>Other</option></SelectField>
+                  <SelectField label="Training Program" error={errors.trainingProgram} registerProps={register("trainingProgram", { required: "Training program is required" })}><option value="">Select program</option><option>Coffee Cupping</option><option>Barista</option><option>Digital Marketing</option><option>International Import Export</option></SelectField>
                   <SelectField label="Training Type" error={errors.trainingType} registerProps={register("trainingType", { required: "Training type is required" })}><option value="">Select type</option><option>Formal</option><option>Non-formal</option></SelectField>
                   <SelectField label="Cooperative Training" error={errors.cooperativeTraining} registerProps={register("cooperativeTraining", { required: "Cooperative training is required" })}><option value="">Select option</option><option>Large scale enterprise</option><option>Medium scale enterprise</option><option>Small scale enterprise</option><option>None</option></SelectField>
                 </div>

@@ -26,6 +26,7 @@ const applicationSchema = new mongoose.Schema(
       trainingStartMonth: { type: String, required: true },
       trainingEndMonth: { type: String, required: true },
       trainingMode: { type: String, required: true, enum: ["Regular", "Extension", "Distance", "Other"] },
+      trainingProgram: { type: String, required: true, enum: ["Coffee Cupping", "Barista", "Digital Marketing", "International Import Export"] },
       trainingType: { type: String, required: true, enum: ["Formal", "Non-formal"] },
       cooperativeTraining: { type: String, required: true, enum: ["Large scale enterprise", "Medium scale enterprise", "Small scale enterprise", "None"] }
     },

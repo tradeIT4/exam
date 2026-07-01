@@ -46,6 +46,7 @@ function printApplication(application) {
       ["Training Start Month", training.trainingStartMonth],
       ["Training End Month", training.trainingEndMonth],
       ["Training Mode", training.trainingMode],
+      ["Training Program", training.trainingProgram],
       ["Training Type", training.trainingType],
       ["Cooperative Training", training.cooperativeTraining]
     ]],
@@ -246,6 +247,8 @@ function DocumentImageSection({ title, image, alt }) {
 export default function Applications() {
   const [rows, setRows] = useState([]);
   const [search, setSearch] = useState("");
+  const [filterMonth, setFilterMonth] = useState("");
+  const [filterProgram, setFilterProgram] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState(null);
@@ -287,17 +290,32 @@ export default function Applications() {
     }
   }
 
+  const trainingProgramOptions = [
+    "Coffee Cupping",
+    "Barista",
+    "Digital Marketing",
+    "International Import Export"
+  ];
+
+  const filteredRows = useMemo(() => rows.filter((row) => {
+    const submittedDate = row.submittedAt || row.createdAt;
+    const submittedMonth = submittedDate ? new Date(submittedDate).toISOString().slice(0, 7) : "";
+    const monthMatches = !filterMonth || submittedMonth === filterMonth;
+    const programMatches = !filterProgram || row.trainingInformation?.trainingProgram === filterProgram;
+    return monthMatches && programMatches;
+  }), [rows, filterMonth, filterProgram]);
+
   const stats = useMemo(() => {
-    const theory = rows.filter((row) => row.assessmentInformation?.registerFor === "Theory").length;
-    const practical = rows.filter((row) => row.assessmentInformation?.registerFor === "Practical").length;
-    const both = rows.filter((row) => row.assessmentInformation?.registerFor === "Both").length;
+    const theory = filteredRows.filter((row) => row.assessmentInformation?.registerFor === "Theory").length;
+    const practical = filteredRows.filter((row) => row.assessmentInformation?.registerFor === "Practical").length;
+    const both = filteredRows.filter((row) => row.assessmentInformation?.registerFor === "Both").length;
     return [
-      { label: "Total Applications", value: rows.length },
+      { label: "Total Applications", value: filteredRows.length },
       { label: "Theory", value: theory },
       { label: "Practical", value: practical },
       { label: "Both", value: both }
     ];
-  }, [rows]);
+  }, [filteredRows]);
 
   const columns = [
     {
@@ -369,10 +387,24 @@ export default function Applications() {
         <input className="input pl-9" placeholder="Search by name, phone, application no." value={search} onChange={(event) => setSearch(event.target.value)} />
       </label>
 
+      <div className="grid gap-3 md:grid-cols-2">
+        <label className="block">
+          <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Filter by month</span>
+          <input className="input" type="month" value={filterMonth} onChange={(event) => setFilterMonth(event.target.value)} />
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Filter by training program</span>
+          <select className="input" value={filterProgram} onChange={(event) => setFilterProgram(event.target.value)}>
+            <option value="">All programs</option>
+            {trainingProgramOptions.map((program) => <option key={program} value={program}>{program}</option>)}
+          </select>
+        </label>
+      </div>
+
       {error && <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{error}</div>}
       {loading && <div className="text-sm font-semibold text-slate-500 dark:text-slate-400">Loading applications...</div>}
 
-      <DataTable columns={columns} rows={rows} empty="No assessment applications found" />
+      <DataTable columns={columns} rows={filteredRows} empty="No assessment applications found" />
 
       {deleteTarget && (
         <Modal title="Delete Application" onClose={() => !deleting && setDeleteTarget(null)}>
@@ -414,6 +446,7 @@ export default function Applications() {
               ["Training Start Month", selected.trainingInformation?.trainingStartMonth],
               ["Training End Month", selected.trainingInformation?.trainingEndMonth],
               ["Training Mode", selected.trainingInformation?.trainingMode],
+              ["Training Program", selected.trainingInformation?.trainingProgram],
               ["Training Type", selected.trainingInformation?.trainingType],
               ["Cooperative Training", selected.trainingInformation?.cooperativeTraining]
             ]} />

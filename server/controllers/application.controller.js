@@ -52,6 +52,7 @@ const applicationSchema = z.object({
   trainingStartMonth: z.string().regex(/^\d{4}-\d{2}$/, "Training start month is required"),
   trainingEndMonth: z.string().regex(/^\d{4}-\d{2}$/, "Training end month is required"),
   trainingMode: z.enum(["Regular", "Extension", "Distance", "Other"]),
+  trainingProgram: z.enum(["Coffee Cupping", "Barista", "Digital Marketing", "International Import Export"]),
   trainingType: z.enum(["Formal", "Non-formal"]),
   cooperativeTraining: z.enum(["Large scale enterprise", "Medium scale enterprise", "Small scale enterprise", "None"]),
   employmentStatus: z.enum(["Self employed", "Government employed", "Private employed", "Unemployed"]),
@@ -195,6 +196,7 @@ export async function createApplication(req, res, next) {
         trainingStartMonth: parsed.trainingStartMonth,
         trainingEndMonth: parsed.trainingEndMonth,
         trainingMode: parsed.trainingMode,
+        trainingProgram: parsed.trainingProgram,
         trainingType: parsed.trainingType,
         cooperativeTraining: parsed.cooperativeTraining
       },
@@ -253,7 +255,8 @@ export async function listApplications(req, res, next) {
         { "personalInformation.phoneNumber": pattern },
         { "personalInformation.email": pattern },
         { "trainingInformation.occupation": pattern },
-        { "trainingInformation.collegeInstituteName": pattern }
+        { "trainingInformation.collegeInstituteName": pattern },
+        { "trainingInformation.trainingProgram": pattern }
       ];
     }
 
