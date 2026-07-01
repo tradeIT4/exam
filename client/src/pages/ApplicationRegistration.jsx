@@ -126,16 +126,22 @@ async function compressImageFile(file) {
   return new File([blob], `${filename}.jpg`, { type: "image/jpeg", lastModified: Date.now() });
 }
 
+const validationFieldLabels = {
+  trainingEndMonth: "Training end month"
+};
+
 function formatValidationDetails(details) {
   if (!Array.isArray(details) || details.length === 0) return "";
 
   return details
     .map((detail) => {
-      const field = Array.isArray(detail.path) && detail.path.length > 0 ? detail.path.join(".") : "Application";
+      const fieldKey = Array.isArray(detail.path) && detail.path.length > 0 ? detail.path.join(".") : "Application";
+      const field = validationFieldLabels[fieldKey] || fieldKey;
       return `${field}: ${detail.message}`;
     })
     .join("; ");
 }
+
 
 function FieldError({ error }) {
   return error ? <div className="invalid-feedback d-block">{error.message}</div> : null;
@@ -355,7 +361,7 @@ export default function ApplicationRegistration() {
                   <TextField label="College/Institute Name" span="full" error={errors.collegeInstituteName} registerProps={register("collegeInstituteName", { required: "College or institute name is required" })} />
                   <SelectField label="Institution Type" error={errors.institutionType} registerProps={register("institutionType", { required: "Institution type is required" })}><option value="">Select type</option><option>Government</option><option>Private</option><option>Other</option></SelectField>
                   <TextField label="Training Start Month" type="month" error={errors.trainingStartMonth} registerProps={register("trainingStartMonth", { required: "Training start month is required" })} />
-                  <TextField label="Training End Month" type="month" error={errors.trainingEndMonth} registerProps={register("trainingEndMonth", { required: "Training end month is required" })} />
+                  <TextField label="Training End Month" type="month" min={values.trainingStartMonth || undefined} error={errors.trainingEndMonth} registerProps={register("trainingEndMonth", { required: "Training end month is required", validate: (value) => !values.trainingStartMonth || !value || value >= values.trainingStartMonth || "End month cannot be before start month" })} />
                   <SelectField label="Training Mode" error={errors.trainingMode} registerProps={register("trainingMode", { required: "Training mode is required" })}><option value="">Select mode</option><option>Regular</option><option>Extension</option><option>Distance</option><option>Other</option></SelectField>
                   <SelectField label="Training Program" error={errors.trainingProgram} registerProps={register("trainingProgram", { required: "Training program is required" })}><option value="">Select program</option><option>Coffee Cupping</option><option>Barista</option><option>Digital Marketing</option><option>International Import Export</option></SelectField>
                   <SelectField label="Training Type" error={errors.trainingType} registerProps={register("trainingType", { required: "Training type is required" })}><option value="">Select type</option><option>Formal</option><option>Non-formal</option></SelectField>
