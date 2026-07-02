@@ -166,7 +166,7 @@ function ActionIconButton({ label, icon: Icon, onClick, tone = "slate" }) {
 }
 
 function toExamPayload(exam, overrides = {}) {
-  return {
+  const payload = {
     courseId: exam.courseId?._id || exam.courseId,
     title: exam.title,
     description: exam.description || "",
@@ -176,6 +176,11 @@ function toExamPayload(exam, overrides = {}) {
     passPercentage: exam.passPercentage,
     startDate: exam.startDate,
     ...overrides
+  };
+  const endDate = calculatedExamEndDate(payload);
+  return {
+    ...payload,
+    endDate: endDate ? endDate.toISOString() : payload.endDate
   };
 }
 
@@ -814,7 +819,7 @@ export default function ExamManagement() {
             </div>
             <textarea className="input sm:col-span-2" placeholder="Description" value={examForm.description} onChange={(e) => setExamForm({ ...examForm, description: e.target.value })} />
             <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
-              <button className="btn-secondary" type="submit" value="save" disabled={savingId === editingExamId}>{savingId === editingExamId ? "Saving..." : editingExamId ? "Save Schedule" : "Save Exam"}</button>
+              <button className="btn-secondary" type="submit" value="save" disabled={Boolean(editingExamId) && savingId === editingExamId}>{Boolean(editingExamId) && savingId === editingExamId ? "Saving..." : editingExamId ? "Save Schedule" : "Save Exam"}</button>
               {!editingExamId && <button className="btn-primary" type="submit" value="addQuestions"><Plus size={16} /> Save Exam and Add Questions</button>}
             </div>
           </form>
