@@ -251,7 +251,8 @@ export default function ExamManagement() {
     const action = e.nativeEvent.submitter?.value || "save";
     try {
       if (editingExamId) {
-        await api.put(`/exams/${editingExamId}`, examForm);
+        setSavingId(editingExamId);
+        await api.put(`/exams/${editingExamId}`, toExamPayload(examForm));
         setEditingExamId("");
         setExamForm(blankExam);
         setModal(null);
@@ -276,6 +277,8 @@ export default function ExamManagement() {
       load();
     } catch (error) {
       setFormError(apiErrorMessage(error));
+    } finally {
+      setSavingId("");
     }
   }
 
@@ -811,7 +814,7 @@ export default function ExamManagement() {
             </div>
             <textarea className="input sm:col-span-2" placeholder="Description" value={examForm.description} onChange={(e) => setExamForm({ ...examForm, description: e.target.value })} />
             <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
-              <button className="btn-secondary" type="submit" value="save">{editingExamId ? "Save Schedule" : "Save Exam"}</button>
+              <button className="btn-secondary" type="submit" value="save" disabled={savingId === editingExamId}>{savingId === editingExamId ? "Saving..." : editingExamId ? "Save Schedule" : "Save Exam"}</button>
               {!editingExamId && <button className="btn-primary" type="submit" value="addQuestions"><Plus size={16} /> Save Exam and Add Questions</button>}
             </div>
           </form>

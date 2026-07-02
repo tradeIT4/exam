@@ -8,10 +8,6 @@ const router = Router();
 
 router.get("/", protect, listExams);
 router.post("/", protect, authorize("ADMIN"), validate(examSchema), createExam);
-router.put("/:id", protect, authorize("ADMIN"), validate(examSchema), updateExam);
-router.patch("/:id/pause", protect, authorize("ADMIN"), pauseExam);
-router.patch("/:id/resume", protect, authorize("ADMIN"), resumeExam);
-router.delete("/:id", protect, authorize("ADMIN"), deleteExam);
 router.post("/start", protect, authorize("STUDENT"), validate(z.object({ body: z.object({ examId: z.string().min(1) }) })), startExam);
 router.put("/attempts/:attemptId/answers", protect, authorize("STUDENT"), validate(z.object({
   body: z.object({
@@ -23,7 +19,9 @@ router.put("/attempts/:attemptId/answers", protect, authorize("STUDENT"), valida
   })
 })), saveAnswers);
 router.post("/submit", protect, authorize("STUDENT"), validate(z.object({ body: z.object({ attemptId: z.string().min(1) }) })), submitExam);
+router.put("/:id", protect, authorize("ADMIN"), validate(examSchema), updateExam);
+router.patch("/:id/pause", protect, authorize("ADMIN"), pauseExam);
+router.patch("/:id/resume", protect, authorize("ADMIN"), resumeExam);
+router.delete("/:id", protect, authorize("ADMIN"), deleteExam);
 
 export default router;
-
-
