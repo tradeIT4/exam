@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { changePassword, createStudent, listStudents, setStudentActive, studentDashboard, listOnlineStudents, listActivityLogs, updateStudent } from "../controllers/user.controller.js";
+import { changePassword, createStudent, deleteStudent, listStudents, setStudentActive, studentDashboard, listOnlineStudents, listActivityLogs, updateStudent } from "../controllers/user.controller.js";
 import { authorize, protect } from "../middlewares/auth.js";
 import { validate } from "../middlewares/validate.js";
 
@@ -26,6 +26,7 @@ const updateStudentSchema = z.object({
 router.get("/students", protect, authorize("ADMIN"), listStudents);
 router.post("/students", protect, authorize("ADMIN"), validate(createStudentSchema), createStudent);
 router.put("/students/:id", protect, authorize("ADMIN"), validate(updateStudentSchema), updateStudent);
+router.delete("/students/:id", protect, authorize("ADMIN"), deleteStudent);
 router.patch("/students/:id/active", protect, authorize("ADMIN"), validate(z.object({ body: z.object({ isActive: z.boolean() }) })), setStudentActive);
 router.get("/online", protect, authorize("ADMIN"), listOnlineStudents);
 router.get("/activity-logs", protect, authorize("ADMIN"), listActivityLogs);

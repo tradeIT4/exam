@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { User } from "../models/User.js";
 import { ExamAttempt } from "../models/ExamAttempt.js";
+import { Answer } from "../models/Answer.js";
 import { Exam } from "../models/Exam.js";
 import { Course } from "../models/Course.js";
 import { ActivityLog } from "../models/ActivityLog.js";
@@ -76,6 +77,13 @@ export async function listStudents(req, res, next) {
   try {
     const search = req.query.search;
     const query = { role: "STUDENT" };
+
+    if (req.query.courseId) {
+      const course = await Course.findById(req.query.courseId).select("courseName");
+      if (!course) return res.json([]);
+      query.trainingTaken = course.courseName;
+    }
+
     if (search) {
       query.$or = [
         { name: new RegExp(search, "i") },
@@ -109,6 +117,23 @@ export async function updateStudent(req, res, next) {
     const sanitized = student.toObject();
     delete sanitized.password;
     res.json(sanitized);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function deleteStudent(req, res, next) {
+  try {
+    const student = await User.findOne({ _id: req.params.id, role: "STUDENT" });
+    if (!student) return res.status(404).json({ message: "Student not found" });
+
+    const attempts = await ExamAttempt.find({ studentId: student._id }).select("_id");
+    const attemptIds = attempts.map((attempt) => attempt._id);
+    if (attemptIds.length) await Answer.deleteMany({ attemptId: { $in: attemptIds } });
+    await ExamAttempt.deleteMany({ studentId: student._id });
+    await User.deleteOne({ _id: student._id });
+
+    res.status(204).end();
   } catch (error) {
     next(error);
   }

@@ -1,34 +1,61 @@
 import { useEffect, useState } from "react";
-import { Search, UserPlus, Copy, Check, KeyRound, Pencil } from "lucide-react";
+import { AlertTriangle, Search, UserPlus, Copy, Check, KeyRound, Pencil, Trash2 } from "lucide-react";
 import DataTable from "../components/DataTable.jsx";
 import Modal from "../components/Modal.jsx";
 import { api } from "../services/api.js";
 
 export default function Students() {
   const [rows, setRows] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [search, setSearch] = useState("");
+  const [courseFilter, setCourseFilter] = useState("");
   const [modal, setModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [form, setForm] = useState({ name: "", batchYear: new Date().getFullYear(), trainingTaken: "", generatePassword: false });
 
-  const trainingOptions = [
+  const fallbackTrainingOptions = [
     "Coffee Cupping",
     "Barista",
     "International Import/Export"
   ];
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [created, setCreated] = useState(null);
   const [copied, setCopied] = useState("");
   const [error, setError] = useState("");
 
   function load() {
-    api.get(`/users/students?search=${encodeURIComponent(search)}`).then((res) => setRows(res.data));
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (courseFilter) params.set("courseId", courseFilter);
+    api.get(`/users/students?${params.toString()}`).then((res) => setRows(res.data));
   }
-  useEffect(load, [search]);
+
+  function loadCourses() {
+    api.get("/courses").then((res) => setCourses(Array.isArray(res.data) ? res.data : []));
+  }
+
+  useEffect(load, [search, courseFilter]);
+  useEffect(loadCourses, []);
 
   async function toggle(row) {
     await api.patch(`/users/students/${row._id}/active`, { isActive: !row.isActive });
     load();
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/users/students/${deleteTarget._id}`);
+      setDeleteTarget(null);
+      load();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete student");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   function resetForm() {
@@ -107,6 +134,7 @@ export default function Students() {
     setTimeout(() => setCopied(""), 2000);
   }
 
+  const trainingOptions = courses.length ? courses.map((course) => course.courseName).filter(Boolean) : fallbackTrainingOptions;
   const currentYear = new Date().getFullYear();
   const batchYears = [];
   for (let y = currentYear; y >= 2015; y--) {
@@ -124,10 +152,16 @@ export default function Students() {
           <UserPlus size={16} /> Add Student
         </button>
       </div>
-      <label className="relative block w-full max-w-md">
-        <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
-        <input className="input pl-9" placeholder="Search students" value={search} onChange={(e) => setSearch(e.target.value)} />
-      </label>
+      <div className="grid gap-3 md:grid-cols-[minmax(240px,420px)_minmax(220px,320px)]">
+        <label className="relative block w-full">
+          <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+          <input className="input pl-9" placeholder="Search students" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </label>
+        <select className="input" value={courseFilter} onChange={(e) => setCourseFilter(e.target.value)}>
+          <option value="">All courses</option>
+          {courses.map((course) => <option key={course._id} value={course._id}>{course.courseCode ? `${course.courseCode} - ${course.courseName}` : course.courseName}</option>)}
+        </select>
+      </div>
       <DataTable columns={[
         { key: "name", label: "Full Name" },
         { key: "enrollmentNumber", label: "Student ID", render: (row) => (
@@ -159,9 +193,46 @@ export default function Students() {
           <div className="flex flex-wrap gap-2">
             <button className="btn-secondary" onClick={() => openEdit(row)}><Pencil size={14} /> Edit</button>
             <button className="btn-secondary" onClick={() => toggle(row)}>{row.isActive ? "Deactivate" : "Activate"}</button>
+            <button
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100 hover:text-red-700 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/60"
+              onClick={() => setDeleteTarget(row)}
+              title="Delete student"
+              type="button"
+            >
+              <Trash2 size={14} /> Delete
+            </button>
           </div>
         ) }
       ]} rows={rows} />
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 shadow-[0_30px_90px_rgba(15,23,42,0.28)] dark:border-slate-800 dark:bg-[#111a2b]">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-300">
+                <AlertTriangle size={26} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-slate-950 dark:text-slate-100">Delete student?</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  This will permanently delete <span className="font-semibold text-slate-950 dark:text-slate-100">{deleteTarget.name}</span>, their account, exam attempts, and saved answers.
+                </p>
+              </div>
+            </div>
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button className="btn-secondary" type="button" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</button>
+              <button
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
+                type="button"
+                onClick={confirmDelete}
+                disabled={deleting}
+              >
+                <Trash2 size={16} /> {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {modal && (
         <Modal title={created ? "Student Created" : editingStudent ? "Edit Student" : "Add New Student"} onClose={closeModal}>

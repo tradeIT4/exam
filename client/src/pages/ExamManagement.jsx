@@ -32,6 +32,11 @@ function toLocalDateTimeInput(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function combineLocalDateAndTime(dateValue, timeValue) {
+  if (!dateValue) return "";
+  return `${dateValue}T${timeValue || "00:00"}`;
+}
+
 function calculatedExamEndDate(exam) {
   if (!exam?.startDate) return null;
   const totalMinutes = (Number(exam.durationMinutes) || 0) + (Number(exam.extraTimeMinutes) || 0);
@@ -480,6 +485,8 @@ export default function ExamManagement() {
   const selectedClock = countdownState(selectedStartExam, now);
   const isLiveClock = selectedClock.mode === "live";
   const isPausedClock = selectedClock.mode === "paused";
+  const examDateValue = examForm.startDate ? examForm.startDate.slice(0, 10) : "";
+  const examStartTimeValue = examForm.startDate ? examForm.startDate.slice(11, 16) : "";
   const calculatedEndDate = calculatedExamEndDate(examForm);
 
   async function openQuestionDetails(exam, fallbackQuestions = []) {
@@ -791,8 +798,12 @@ export default function ExamManagement() {
             <input className="input" type="number" placeholder="Total marks" value={examForm.totalMarks} onChange={(e) => setExamForm({ ...examForm, totalMarks: e.target.value })} required />
             <input className="input" type="number" placeholder="Pass percentage" value={examForm.passPercentage} onChange={(e) => setExamForm({ ...examForm, passPercentage: e.target.value })} required />
             <label className="space-y-1 text-sm font-semibold text-slate-600">
-              <span>Start time</span>
-              <input className="input" type="datetime-local" value={examForm.startDate} onChange={(e) => setExamForm({ ...examForm, startDate: e.target.value })} required />
+              <span>Exam date</span>
+              <input className="input" type="date" value={examDateValue} onChange={(e) => setExamForm({ ...examForm, startDate: combineLocalDateAndTime(e.target.value, examStartTimeValue) })} required />
+            </label>
+            <label className="space-y-1 text-sm font-semibold text-slate-600">
+              <span>Starting time</span>
+              <input className="input" type="time" value={examStartTimeValue} onChange={(e) => setExamForm({ ...examForm, startDate: combineLocalDateAndTime(examDateValue, e.target.value) })} required />
             </label>
             <div className="space-y-1 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
               <span className="block">End time</span>
